@@ -57,7 +57,7 @@ void main(){
 		//Move Sphere
 		sphereMovement = directionVector3(&camera.position, &spherePos);
 	        sphereMovement = Vector3Scale(sphereMovement, 0.01f);	
-		spherePos = Vector3Add(spherePos, sphereMovement);
+		//spherePos = Vector3Add(spherePos, sphereMovement);
 
 		/*
 		if(CheckCollisionSpheres(spherePos, sphereRadius, camera.position, 0)){
