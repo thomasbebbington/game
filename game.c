@@ -1,6 +1,8 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "character.h"
+#include "generation.h"
+
 #include <stdio.h>
 #include <math.h>
 
@@ -52,6 +54,22 @@ void main(){
 
 	int cameraMode = CAMERA_FIRST_PERSON;
 
+	Mesh blockmesh = GenMeshCube(1.0f,6.0f,1.0f);
+	Model blockmodel = LoadModelFromMesh(blockmesh);
+
+	Texture2D blocktexture = LoadTexture("stone.png");
+	blockmodel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = blocktexture;
+
+	Mesh cube = GenMeshCube(101.0f, 1.0f, 101.0f);
+	Model model = LoadModelFromMesh(cube);
+
+	Texture2D texture = LoadTexture("missing.png");
+	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+	
+	char grid[101][101] = {{0}};
+	makegrid(grid);
+	printgrid(grid);
+
 	while(!WindowShouldClose()){
 		//UpdateCamera(&camera, cameraMode);
 		//Move Sphere
@@ -75,8 +93,17 @@ void main(){
 
 		BeginMode3D(camera);
 
-		DrawCube((Vector3) {0.0f,-1.0f,0.0f}, 100.0f, 1.0f, 100.0f, BROWN);
-		DrawCube((Vector3) {0.0f,4.0f,0.0f}, 100.0f, 1.0f, 100.0f, GRAY);
+		for(int i = 0; i < 101; i++){
+			for(int j = 0; j < 101; j++){
+				if(grid[i][j] == 0 || grid[i][j] == 3){
+					DrawModel(blockmodel, (Vector3) {-50.5f + i, 0.0f, -50.5f + j}, 1.0f, WHITE);
+				}
+			}
+		}
+
+		//DrawCube((Vector3) {0.0f,-1.0f,0.0f}, 100.0f, 1.0f, 100.0f, BROWN);
+		DrawModel(model, (Vector3) {0.0f,-1.0f,0.0f}, 1.0f, WHITE);
+		//DrawCube((Vector3) {0.0f,4.0f,0.0f}, 100.0f, 1.0f, 100.0f, GRAY);
 
 		DrawSphere(spherePos, sphereRadius, RED); 
 
@@ -85,6 +112,7 @@ void main(){
 		DrawFPS(10,10);
 		EndDrawing();
 	}
-
+	UnloadModel(model);
+	UnloadTexture(texture);
 	CloseWindow();
 }

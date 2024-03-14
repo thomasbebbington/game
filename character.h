@@ -42,15 +42,19 @@ void UpdateCharacter(character* character, int framerate){
 
 	if(IsKeyDown(KEY_D)) right++;
 	if(IsKeyDown(KEY_A)) right--;
-		
+	
+
+	if(IsKeyDown(KEY_SPACE)) character->position = Vector3Add(character->position, (Vector3) {0.0f,1.0f,0.0f});	
+	if(IsKeyDown(KEY_LEFT_SHIFT)) character->position = Vector3Add(character->position, (Vector3) {0.0f,-1.0f,0.0f});	
 	Vector3 fwd = {0};
 	fwd.x = character->direction.x;
 	fwd.z = character->direction.z;
+	fwd = Vector3Normalize(fwd);
 
 	Vector3 rght = {0};
 	rght.x = rightdir.x;
 	rght.z = rightdir.z;
-
+	rght = Vector3Normalize(rght);
 
 	character->acceleration = (Vector3) {0.0f,0.0f,0.0f};
 
@@ -64,6 +68,7 @@ void UpdateCharacter(character* character, int framerate){
 
 		fwdaccel = Vector3Scale(fwdaccel, DECEL_VALUE);
 	} else {
+		fwdaccel = Vector3Normalize(fwd);
 		fwdaccel = Vector3Scale(fwd, (float) forward);
 	}
 	if(right == 0){
@@ -71,6 +76,7 @@ void UpdateCharacter(character* character, int framerate){
 		rghtaccel = Vector3Normalize(rghtaccel);
 		rghtaccel = Vector3Scale(rghtaccel, DECEL_VALUE);
 	} else {
+		rghtaccel = Vector3Normalize(rghtaccel);
 		rghtaccel = Vector3Scale(rght, (float) right);
 	}
 
