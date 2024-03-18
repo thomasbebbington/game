@@ -54,7 +54,7 @@ void main(){
 
 	int cameraMode = CAMERA_FIRST_PERSON;
 
-	Mesh blockmesh = GenMeshCube(1.0f,6.0f,1.0f);
+	Mesh blockmesh = GenMeshCube(10.0f,10.0f,10.0f);
 	Model blockmodel = LoadModelFromMesh(blockmesh);
 
 	Texture2D blocktexture = LoadTexture("stone.png");
@@ -67,7 +67,9 @@ void main(){
 	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 	
 	char grid[101][101] = {{0}};
-	makegrid(grid);
+	char discovered[101][101] = {{0}};
+	//makegrid(grid);
+	newmakegrid(grid);
 	printgrid(grid);
 
 	while(!WindowShouldClose()){
@@ -89,20 +91,36 @@ void main(){
 
 		BeginDrawing();
 
-		ClearBackground(RAYWHITE);
+		ClearBackground(SKYBLUE);
 
 		BeginMode3D(camera);
 
+		int blockcount = 0;
+
 		for(int i = 0; i < 101; i++){
 			for(int j = 0; j < 101; j++){
-				if(grid[i][j] == 0 || grid[i][j] == 3){
-					DrawModel(blockmodel, (Vector3) {-50.5f + i, 0.0f, -50.5f + j}, 1.0f, WHITE);
+				if(grid[i][j] == 0){
+					Vector3 blockpos = (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)};
+					Vector3 dirvec = directionVector3(&(thechar.position), &blockpos);
+					float prod = Vector3DotProduct(dirvec, thechar.direction);
+					if(prod < 0){
+						blockcount++;
+						DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, WHITE);
+					}
+
+				}
+				if(grid[i][j] == 4){
+					DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, BLACK);
+
 				}
 			}
 		}
+		//printf("Block count: %d\n", blockcount);
 
 		//DrawCube((Vector3) {0.0f,-1.0f,0.0f}, 100.0f, 1.0f, 100.0f, BROWN);
-		DrawModel(model, (Vector3) {0.0f,-1.0f,0.0f}, 1.0f, WHITE);
+		//DrawModel(model, (Vector3) {0.0f,-10.0f,0.0f}, 10.0f, BROWN);
+
+		//DrawModel(model, (Vector3) {0.0f,10.0f,0.0f}, 10.0f, BROWN);
 		//DrawCube((Vector3) {0.0f,4.0f,0.0f}, 100.0f, 1.0f, 100.0f, GRAY);
 
 		DrawSphere(spherePos, sphereRadius, RED); 
@@ -110,8 +128,30 @@ void main(){
 		EndMode3D();
 		
 		DrawFPS(10,10);
+
+		int screenheight = GetScreenHeight();
+
+		/*
+		DrawLine(10, screenheight - 10, 10, screenheight - 210, WHITE);
+		DrawLine(10, screenheight - 10, 210, screenheight - 10, WHITE);
+		DrawLine(10, screenheight - 210, 210, screenheight - 210, WHITE);
+		DrawLine(210, screenheight - 210, 210, screenheight - 10, WHITE);
+		*/
+
+		for(int i = 0; i < 101; i++){
+			for(int j = 0; j < 101; j++){
+				if(grid[i][j] == 0){
+					DrawRectangle(10 + (2*i), screenheight - 210 + (2*j), 2, 2, WHITE);
+				}
+				if(grid[i][j] == 4){
+					DrawRectangle(10 + (2*i), screenheight - 210 + (2*j), 2, 2, BLACK);
+				}
+			}
+		}
 		EndDrawing();
 	}
+	UnloadModel(blockmodel);
+	UnloadTexture(blocktexture);
 	UnloadModel(model);
 	UnloadTexture(texture);
 	CloseWindow();

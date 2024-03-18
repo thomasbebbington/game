@@ -2,7 +2,7 @@
 #include "raymath.h"
 #include <stdio.h>
 
-#define MAX_SPEED 0.1f
+#define MAX_SPEED 0.8f
 #define DECEL_VALUE 2.0f
 
 typedef struct character {
