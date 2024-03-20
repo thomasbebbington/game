@@ -216,9 +216,6 @@ void makegrid(char grid[size][size]){
 
 	}
 
-	for(int k = 0; k < roomcount; k++){
-		printf("%d %d %d %d\n", rooms[k].xpos, rooms[k].ypos, rooms[k].width, rooms[k].height);
-	}
 }
 
 static char checkroomcollision(room* rooms, int roomtocheck){
@@ -246,7 +243,6 @@ goagain:
 
 				if(adjcount == 1){
 					grid[i][j] = 0;
-					printf("%d %d is dead end\n", i, j);
 					goto goagain;
 				}
 			}
@@ -255,7 +251,6 @@ goagain:
 }
 
 static void cleanmaze(char grid[size][size]){
-	printf("Cleaning...\n");
 	for(int i = 1; i < size - 1; i++){
 		for(int j = 1; j < size - 1; j++){
 			if(grid[i][j] == 0){
@@ -357,7 +352,6 @@ void newmakegrid(char grid[size][size]){
 
 
 
-	printgrid(grid);
 	domaze(grid, rooms[0].xpos - 2, rooms[0].ypos - 2);			
 	int possdoors[20];
 	int countpossdoors = 0;

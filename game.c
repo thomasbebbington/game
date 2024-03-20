@@ -70,14 +70,14 @@ void main(){
 	char discovered[101][101] = {{0}};
 	//makegrid(grid);
 	newmakegrid(grid);
-	printgrid(grid);
+	//printgrid(grid);
 
 	while(!WindowShouldClose()){
 		//UpdateCamera(&camera, cameraMode);
 		//Move Sphere
 		sphereMovement = directionVector3(&camera.position, &spherePos);
 	        sphereMovement = Vector3Scale(sphereMovement, 0.01f);	
-		//spherePos = Vector3Add(spherePos, sphereMovement);
+		spherePos = Vector3Add(spherePos, sphereMovement);
 
 		/*
 		if(CheckCollisionSpheres(spherePos, sphereRadius, camera.position, 0)){
@@ -85,7 +85,16 @@ void main(){
 		}
 		*/
 
-		UpdateCharacter(&thechar, framerate);	
+		UpdateCharacterNewNew(&thechar, framerate, grid);	
+		
+		Vector2 charblock = {0};
+
+		charblock.x = floor((thechar.position.x + 510.0f) / 10.0f);
+		charblock.y = floor((thechar.position.z + 510.0f) / 10.0f);
+
+		
+
+
 		moveCamera(&camera.position, &thechar.position, thechar.height);
 		camera.target = Vector3Add(camera.position, thechar.direction);
 
@@ -103,7 +112,7 @@ void main(){
 					Vector3 blockpos = (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)};
 					Vector3 dirvec = directionVector3(&(thechar.position), &blockpos);
 					float prod = Vector3DotProduct(dirvec, thechar.direction);
-					if(prod < 0){
+					if(prod < 1.0f){
 						blockcount++;
 						DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, WHITE);
 					}
@@ -138,16 +147,24 @@ void main(){
 		DrawLine(210, screenheight - 210, 210, screenheight - 10, WHITE);
 		*/
 
+
+		int minimapscale = 3;
+
 		for(int i = 0; i < 101; i++){
 			for(int j = 0; j < 101; j++){
 				if(grid[i][j] == 0){
-					DrawRectangle(10 + (2*i), screenheight - 210 + (2*j), 2, 2, WHITE);
+					DrawRectangle(10 + (minimapscale*i), screenheight - (105*minimapscale) + (minimapscale*j), minimapscale, minimapscale, WHITE);
 				}
 				if(grid[i][j] == 4){
-					DrawRectangle(10 + (2*i), screenheight - 210 + (2*j), 2, 2, BLACK);
+					DrawRectangle(10 + (minimapscale*i), screenheight - (105*minimapscale) + (minimapscale*j), minimapscale, minimapscale, BLACK);
 				}
 			}
 		}
+		
+		//Draw char on map
+		
+		DrawRectangle(10 + (minimapscale*charblock.x), screenheight - (105*minimapscale) + (minimapscale*charblock.y), minimapscale, minimapscale, RED);
+
 		EndDrawing();
 	}
 	UnloadModel(blockmodel);
