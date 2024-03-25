@@ -54,8 +54,10 @@ void main(){
 
 	int cameraMode = CAMERA_FIRST_PERSON;
 
+
 	Mesh blockmesh = GenMeshCube(10.0f,10.0f,10.0f);
 	Model blockmodel = LoadModelFromMesh(blockmesh);
+	BoundingBox blockbox = GetModelBoundingBox(blockmodel);
 
 	Texture2D blocktexture = LoadTexture("stone.png");
 	blockmodel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = blocktexture;
@@ -67,33 +69,20 @@ void main(){
 	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 	
 	char grid[101][101] = {{0}};
-	char discovered[101][101] = {{0}};
-	//makegrid(grid);
 	newmakegrid(grid);
-	//printgrid(grid);
 
 	while(!WindowShouldClose()){
-		//UpdateCamera(&camera, cameraMode);
-		//Move Sphere
 		sphereMovement = directionVector3(&camera.position, &spherePos);
 	        sphereMovement = Vector3Scale(sphereMovement, 0.01f);	
 		spherePos = Vector3Add(spherePos, sphereMovement);
-
-		/*
-		if(CheckCollisionSpheres(spherePos, sphereRadius, camera.position, 0)){
-			break;
-		}
-		*/
-
-		UpdateCharacterNewNew(&thechar, framerate, grid);	
+		
+		float ft = GetFrameTime();
+		UpdateCharacterNewNew(&thechar, (1.0f/ft), grid, blockbox);
 		
 		Vector2 charblock = {0};
 
 		charblock.x = floor((thechar.position.x + 510.0f) / 10.0f);
 		charblock.y = floor((thechar.position.z + 510.0f) / 10.0f);
-
-		
-
 
 		moveCamera(&camera.position, &thechar.position, thechar.height);
 		camera.target = Vector3Add(camera.position, thechar.direction);
@@ -103,6 +92,7 @@ void main(){
 		ClearBackground(SKYBLUE);
 
 		BeginMode3D(camera);
+
 
 		int blockcount = 0;
 
@@ -124,13 +114,6 @@ void main(){
 				}
 			}
 		}
-		//printf("Block count: %d\n", blockcount);
-
-		//DrawCube((Vector3) {0.0f,-1.0f,0.0f}, 100.0f, 1.0f, 100.0f, BROWN);
-		//DrawModel(model, (Vector3) {0.0f,-10.0f,0.0f}, 10.0f, BROWN);
-
-		//DrawModel(model, (Vector3) {0.0f,10.0f,0.0f}, 10.0f, BROWN);
-		//DrawCube((Vector3) {0.0f,4.0f,0.0f}, 100.0f, 1.0f, 100.0f, GRAY);
 
 		DrawSphere(spherePos, sphereRadius, RED); 
 
@@ -139,14 +122,6 @@ void main(){
 		DrawFPS(10,10);
 
 		int screenheight = GetScreenHeight();
-
-		/*
-		DrawLine(10, screenheight - 10, 10, screenheight - 210, WHITE);
-		DrawLine(10, screenheight - 10, 210, screenheight - 10, WHITE);
-		DrawLine(10, screenheight - 210, 210, screenheight - 210, WHITE);
-		DrawLine(210, screenheight - 210, 210, screenheight - 10, WHITE);
-		*/
-
 
 		int minimapscale = 3;
 

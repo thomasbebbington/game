@@ -144,80 +144,6 @@ static int randint(int min, int max){
 	return (rand() % (max - min)) + min;
 }
 
-void makegrid(char grid[size][size]){
-	//char grid[size][size] = {{0}};
-
-	for(int i = 0; i < size; i++){
-		for(int j = 0; j < (size + 1); j++){
-			grid[i][j] = 3;
-		}
-	}
-	srand(time(NULL));
-	// 0 = wall
-	// 1 = empty
-	// 2 = exposed and undetermined
-	// 3 = unexposed and undetermined
-
-	coord todo[(size + 1)*(size + 1)] = {0};
-	int top = -1;
-	carve((size/2),(size/2),grid, todo, &top);
-
-
-
-	while(top > -1){
-		int choice = rand() % (top + 1);
-		if(check(todo[choice].x, todo[choice].y, grid)){
-			carve(todo[choice].x,todo[choice].y, grid, todo, &top);
-			
-		}else{
-			grid[todo[choice].x][todo[choice].y] = 0;
-		}
-		memmove(&todo[choice], &todo[choice+1], (top - choice) * sizeof(coord));
-
-
-		top--;
-	}
-
-	room startingroom = {0};
-	int startingroomsize = ceil(size / 5);
-	startingroom.width = startingroomsize;
-	startingroom.height = startingroomsize;
-	startingroom.xpos = (size / 2) - (startingroomsize/2);
-	startingroom.ypos = startingroom.xpos;
-	for(int c = (size / 2) - (startingroomsize / 2); c < (size / 2) + (startingroomsize / 2); c++){
-		for(int r = (size / 2) - (startingroomsize / 2); r < (size / 2) + (startingroomsize / 2); r++){
-			grid[r][c] = 1;
-
-		}
-	}
-	
-	int extrarooms = (rand() % 4) + 6;
-
-	const int roomcount = extrarooms+1;
-	room rooms[roomcount];
-	rooms[0] = startingroom;
-
-	for(int w = 0; w < extrarooms; w++){
-		int width = (rand() % 10) + 10;
-		int height = (rand() % 10) + 10;
-		
-		int xpos = (rand() % (size - width - 2)) + 1;
-		int ypos = (rand() % (size - height - 2)) + 1;
-		rooms[w + 1].xpos = xpos;
-		rooms[w + 1].ypos = ypos;
-		rooms[w + 1].width = width;
-		rooms[w + 1].height = height;
-
-		for(int i = xpos; i < xpos + width; i++){
-			for(int j = ypos; j < ypos + height; j++){
-				grid[i][j] = 1;
-			}
-		}
-
-	}
-
-}
-
 static char checkroomcollision(room* rooms, int roomtocheck){
 	for(int i = 0; i < roomtocheck; i++){
 		if(rooms[i].xpos + rooms[i].width + 4 > rooms[roomtocheck].xpos
@@ -315,7 +241,7 @@ void newmakegrid(char grid[size][size]){
 			}
 		}
 	}
-	
+
 	for(int i = 0; i < size; i++){
 		for(int j = 1; j < size - 1; j++){
 			grid[i][j] = 3;
@@ -356,6 +282,7 @@ void newmakegrid(char grid[size][size]){
 	int possdoors[20];
 	int countpossdoors = 0;
 
+	//todo: fix stack buffer overflow in here somewhere
 	for(int i = 0; i < roomcount; i++){
 		if(rooms[i].ypos > 2){
 			countpossdoors = 0;
@@ -419,6 +346,7 @@ void newmakegrid(char grid[size][size]){
 			}
 		}
 	}
+	//
 
 	removedeadends(grid);
 	cleanmaze(grid);
