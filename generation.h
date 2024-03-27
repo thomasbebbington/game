@@ -222,8 +222,8 @@ void newmakegrid(char grid[size][size]){
 		int attemptsremaining = 4;
 
 		while(1){
-			int xpos = randint(2, size - rooms[i].width - 1);
-			int ypos = randint(2, size - rooms[i].height - 1);
+			int xpos = randint(2, size - rooms[i].width - 2);
+			int ypos = randint(2, size - rooms[i].height - 2);
 			
 			rooms[i].xpos = xpos;
 			rooms[i].ypos = ypos;
@@ -279,7 +279,7 @@ void newmakegrid(char grid[size][size]){
 
 
 	domaze(grid, rooms[0].xpos - 2, rooms[0].ypos - 2);			
-	int possdoors[20];
+	int possdoors[21];
 	int countpossdoors = 0;
 
 	//todo: fix stack buffer overflow in here somewhere
