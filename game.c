@@ -77,7 +77,8 @@ void main(){
 		spherePos = Vector3Add(spherePos, sphereMovement);
 		
 		float ft = GetFrameTime();
-		UpdateCharacterNewNew(&thechar, (1.0f/ft), grid, blockbox);
+		char blinded = 0;
+		UpdateCharacterNewNew(&thechar, (1.0f/ft), grid, blockbox, &blinded);
 		
 		Vector2 charblock = {0};
 
@@ -89,33 +90,49 @@ void main(){
 
 		BeginDrawing();
 
-		ClearBackground(SKYBLUE);
+
 
 		BeginMode3D(camera);
 
 
-		int blockcount = 0;
+	
+		ClearBackground(BLACK);
 
-		for(int i = 0; i < 101; i++){
-			for(int j = 0; j < 101; j++){
-				if(grid[i][j] == 0){
-					Vector3 blockpos = (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)};
-					Vector3 dirvec = directionVector3(&(thechar.position), &blockpos);
-					float prod = Vector3DotProduct(dirvec, thechar.direction);
-					if(prod < 1.0f){
-						blockcount++;
-						DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, WHITE);
+		if(!blinded){
+
+			ClearBackground(SKYBLUE);
+
+			for(int i = 0; i < 101; i++){
+				for(int j = 0; j < 101; j++){
+					if(grid[i][j] == 0){
+						Vector3 blockpos = (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)};
+						Vector3 dirvec = directionVector3(&(thechar.position), &blockpos);
+						float prod = Vector3DotProduct(dirvec, thechar.direction);
+						if(prod < 1.0f){
+							DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, WHITE);
+						}
+
 					}
+					if(grid[i][j] == 4){
+						DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, BLACK);
 
-				}
-				if(grid[i][j] == 4){
-					DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, BLACK);
-
+					}
 				}
 			}
+
+			DrawSphere(spherePos, sphereRadius, RED); 
+
 		}
 
-		DrawSphere(spherePos, sphereRadius, RED); 
+		if(blinded){
+			ClearBackground(BLACK);
+		}
+
+
+
+
+		
+		
 
 		EndMode3D();
 		

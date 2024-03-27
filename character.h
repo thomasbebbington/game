@@ -7,6 +7,7 @@
 #define ACCEL_VALUE 0.005f
 #define DECEL_VALUE 0.005f
 #define MAX_ROTATE 0.5f
+#define HITBOX_SIZE 1.0f
 
 typedef struct character {
 	Vector3 position;
@@ -36,7 +37,7 @@ static void CharLook(character* character, int framerate){
 	CharPitch(character, -mousePosDelt.y*character->mouseSens);
 }
 
-void UpdateCharacterNewNew(character* character, int framerate, char grid[101][101], BoundingBox bbox){
+void UpdateCharacterNewNew(character* character, int framerate, char grid[101][101], BoundingBox bbox, char* blinded){
 	CharLook(character, framerate);
 	
 	Vector3 forwarddir = (Vector3) {character->direction.x, 0.0f, character->direction.z};
@@ -59,12 +60,15 @@ void UpdateCharacterNewNew(character* character, int framerate, char grid[101][1
 	movedirection = Vector3Normalize(movedirection);
 	movedirection = Vector3Scale(movedirection, MAX_SPEED*(240.0f/framerate));
 
-	Vector3 newpos = Vector3Add(character->position, movedirection);
-
-	int charblockx = floor((newpos.x + 510.0f) / 10.0f);
-	int charblockz = floor((newpos.z + 510.0f) / 10.0f);
+	int charblockx = floor((character->position.x + 510.0f) / 10.0f);
+	int charblockz = floor((character->position.z + 510.0f) / 10.0f);
 	bool xmove = true;
 	bool zmove = true;
+	
+	*blinded = 0;
+	if(grid[charblockx][charblockz] == 4){
+		*blinded = 1;
+	}
 
 	int xdiff;
 	if(movedirection.x > 0){
@@ -72,16 +76,19 @@ void UpdateCharacterNewNew(character* character, int framerate, char grid[101][1
 	} else {
 		xdiff = -1;
 	}
-
-	if(grid[charblockx + xdiff][charblockz] == 0){
-		float blockxpos = -505.0f + (10*(charblockx+xdiff));
-		float blockzpos = -505.0f + (10*charblockz);
-		Vector3 blockpos = (Vector3) {blockxpos, 0.0f, blockzpos};
-		BoundingBox box = (BoundingBox) {Vector3Add(bbox.min, blockpos), Vector3Add(bbox.max, blockpos)};
-		if(CheckCollisionBoxSphere(box, character->position, 2.0f)){
+	
+	for(int zch = -1; zch < 2; zch = zch + 2){
+		int blockx = floor((character->position.x + (xdiff * HITBOX_SIZE) + 510.0f) / 10.0f);
+		int blockz = floor((character->position.z + (zch * HITBOX_SIZE * 0.6f) + 510.0f) / 10.0f);
+		if(grid[blockx][blockz] == 0){
 			xmove = false;
 		}
-	}
+		blockz = floor((character->position.z + (0.5f * zch) + 510.0f) / 10.0f);
+		blockx = floor((character->position.x + 510.0f) / 10.0f);
+		if(grid[blockx][blockz] == 4){
+			*blinded = 1;
+		}
+	}		
 
 	int zdiff;
 	if(movedirection.z > 0){
@@ -89,15 +96,20 @@ void UpdateCharacterNewNew(character* character, int framerate, char grid[101][1
 	} else {
 		zdiff = -1;
 	}
-	if(grid[charblockx][charblockz + zdiff] == 0){
-		float blockxpos = -505.0f + (10*charblockx);
-		float blockzpos = -505.0f + (10*(charblockz+zdiff));
-		Vector3 blockpos = (Vector3) {blockxpos, 0.0f, blockzpos};
-		BoundingBox box = (BoundingBox) {Vector3Add(bbox.min, blockpos), Vector3Add(bbox.max, blockpos)};
-		if(CheckCollisionBoxSphere(box, character->position, 2.0f)){
+
+	for(int xch = -1; xch < 2; xch = xch + 2){
+		int blockx = floor((character->position.x + (xch * HITBOX_SIZE * 0.6f) + 510.0f) / 10.0f);
+		int blockz = floor((character->position.z + (zdiff * HITBOX_SIZE) + 510.0f) / 10.0f);
+		if(grid[blockx][blockz] == 0){
 			zmove = false;
 		}
-	}
+		blockx = floor((character->position.x + (0.5f * xch) + 510.0f) / 10.0f);
+	        blockz = floor((character->position.z + 510.0f) / 10.0f);
+		if(grid[blockx][blockz] == 4){
+			*blinded = 1;
+		}	
+	}	
+
 
 	if(xmove == false){
 		movedirection.x = 0.0f;
