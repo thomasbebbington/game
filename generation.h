@@ -132,14 +132,6 @@ static void domaze(char grid[size][size], char startx, char starty){
 	}
 }
 
-/*
-2 to 5
-5 - 2 = 3
-
-rand() % 3 is 0 to 2
-0 to 2 + 3 is 3 to 5
-*/
-
 static int randint(int min, int max){
 	return (rand() % (max - min)) + min;
 }
@@ -194,7 +186,7 @@ static void cleanmaze(char grid[size][size]){
 	}
 }
 
-void newmakegrid(char grid[size][size]){
+void newmakegrid(char grid[size][size], room* rooms, int* roomcount){
 	srand(time(NULL));
 
 	room startingroom = {0};
@@ -205,12 +197,12 @@ void newmakegrid(char grid[size][size]){
 
 	int extrarooms = (rand() % 4) + 6;
 
-	int roomcount = extrarooms + 1;
-	room rooms[roomcount];
+	*roomcount = extrarooms + 1;
+	rooms = malloc(sizeof(room) * *roomcount);
 	
 	rooms[0] = startingroom;
 	
-	for(int j = 1; j < roomcount; j++){
+	for(int j = 1; j < *roomcount; j++){
 		int roomwidth = (rand() % 10) + 10;
 		int roomheight = (rand() % 10) + 10;
 
@@ -218,7 +210,7 @@ void newmakegrid(char grid[size][size]){
 		rooms[j].height = roomheight;
 	}
 
-	for(int i = 1; i < roomcount; i++){
+	for(int i = 1; i < *roomcount; i++){
 		int attemptsremaining = 4;
 
 		while(1){
@@ -257,7 +249,7 @@ void newmakegrid(char grid[size][size]){
 		grid[size - 1][j] = 0;
 	}
 
-	for(int i = 0; i < roomcount; i++){
+	for(int i = 0; i < *roomcount; i++){
 		//grid[rooms[i].xpos - 1][rooms[i].ypos - 1] = 0;
 		if(rooms[i].xpos > 0){
 			for(int r = rooms[i].xpos - 1; r < rooms[i].xpos + rooms[i].width + 2; r++){
@@ -279,11 +271,11 @@ void newmakegrid(char grid[size][size]){
 
 
 	domaze(grid, rooms[0].xpos - 2, rooms[0].ypos - 2);			
-	int possdoors[21];
+	int possdoors[22];
 	int countpossdoors = 0;
 
 	//todo: fix stack buffer overflow in here somewhere
-	for(int i = 0; i < roomcount; i++){
+	for(int i = 0; i < *roomcount; i++){
 		if(rooms[i].ypos > 2){
 			countpossdoors = 0;
 
@@ -329,7 +321,7 @@ void newmakegrid(char grid[size][size]){
 				int door = randint(0, countpossdoors - 1);
 				grid[rooms[i].xpos - 1][possdoors[door]] = 4;
 			}
-					}
+		}
 		if(rooms[i].xpos < size - 2 && rooms[i].xpos > -1){
 			countpossdoors = 0;
 
@@ -347,7 +339,6 @@ void newmakegrid(char grid[size][size]){
 		}
 	}
 	//
-
 	removedeadends(grid);
 	cleanmaze(grid);
 }

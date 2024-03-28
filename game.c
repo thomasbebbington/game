@@ -18,6 +18,29 @@ void moveCamera(Vector3* camPos, Vector3* charPos, float charHeight){
 	camPos->z = charPos->z;
 }
 
+void DrawTheGrid(char grid[101][101], character thechar, Model blockmodel){
+	DrawCube((Vector3) {0.0f,-10.0f,0.0f}, 1000.0f, 10.0f, 1000.0f, BROWN);
+
+	for(int i = 0; i < 101; i++){
+		for(int j = 0; j < 101; j++){
+			if(grid[i][j] == 0){
+				Vector3 blockpos = (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)};
+				Vector3 dirvec = directionVector3(&(thechar.position), &blockpos);
+				float prod = Vector3DotProduct(dirvec, thechar.direction);
+				if(prod < 1.0f){
+					DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, WHITE);
+				}
+
+			}
+			if(grid[i][j] == 4){
+				DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, BLACK);
+
+			}
+		}
+	}
+}
+
+
 void main(){
 	const int w = 800;
 	const int h = 600;
@@ -57,7 +80,6 @@ void main(){
 
 	Mesh blockmesh = GenMeshCube(10.0f,10.0f,10.0f);
 	Model blockmodel = LoadModelFromMesh(blockmesh);
-	BoundingBox blockbox = GetModelBoundingBox(blockmodel);
 
 	Texture2D blocktexture = LoadTexture("stone.png");
 	blockmodel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = blocktexture;
@@ -69,7 +91,10 @@ void main(){
 	model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 	
 	char grid[101][101] = {{0}};
-	newmakegrid(grid);
+	room* rooms;
+	int roomcount;
+	newmakegrid(grid, rooms, &roomcount);
+	SetMousePosition(400,300);
 
 	while(!WindowShouldClose()){
 		sphereMovement = directionVector3(&camera.position, &spherePos);
@@ -78,7 +103,7 @@ void main(){
 		
 		float ft = GetFrameTime();
 		char blinded = 0;
-		UpdateCharacterNewNew(&thechar, (1.0f/ft), grid, blockbox, &blinded);
+		UpdateCharacter(&thechar, (1.0f/ft), grid, &blinded);
 		
 		Vector2 charblock = {0};
 
@@ -90,49 +115,19 @@ void main(){
 
 		BeginDrawing();
 
-
-
 		BeginMode3D(camera);
 
-
-	
 		ClearBackground(BLACK);
 
 		if(!blinded){
-
 			ClearBackground(SKYBLUE);
 
-			for(int i = 0; i < 101; i++){
-				for(int j = 0; j < 101; j++){
-					if(grid[i][j] == 0){
-						Vector3 blockpos = (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)};
-						Vector3 dirvec = directionVector3(&(thechar.position), &blockpos);
-						float prod = Vector3DotProduct(dirvec, thechar.direction);
-						if(prod < 1.0f){
-							DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, WHITE);
-						}
-
-					}
-					if(grid[i][j] == 4){
-						DrawModel(blockmodel, (Vector3) {-505.0f + (10*i), 0.0f, -505.0f + (10*j)}, 1.0f, BLACK);
-
-					}
-				}
-			}
-
+			DrawTheGrid(grid, thechar, blockmodel);
+			
 			DrawSphere(spherePos, sphereRadius, RED); 
-
-		}
-
-		if(blinded){
+		} else {
 			ClearBackground(BLACK);
 		}
-
-
-
-
-		
-		
 
 		EndMode3D();
 		
@@ -159,6 +154,7 @@ void main(){
 
 		EndDrawing();
 	}
+	free(rooms);
 	UnloadModel(blockmodel);
 	UnloadTexture(blocktexture);
 	UnloadModel(model);
